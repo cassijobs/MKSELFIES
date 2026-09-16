@@ -11,11 +11,11 @@ function drawMirrored(ctx,video,x,y,w,h){ctx.save();ctx.translate(x+w,y);ctx.sca
 function capture(){
  const video=document.querySelector('#video'),canvas=document.querySelector('#canvas'),guide=document.querySelector('#guide'),c=config();
  if(!video?.videoWidth){showStatus('Aguarde a câmera ficar pronta.');return}
- const sourceW=video.videoWidth,sourceH=video.videoHeight,outW=sourceW,outH=sourceH,ctx=canvas.getContext('2d');
+ const sourceW=video.videoWidth,sourceH=video.videoHeight,outW=1080,outH=1440,ctx=canvas.getContext('2d');
  canvas.width=outW;canvas.height=outH;
- const photoW=outW,photoH=outH,photoX=0,photoY=0;
+ const photoScale=Math.max(outW/sourceW,outH/sourceH),photoW=sourceW*photoScale,photoH=sourceH*photoScale,photoX=(outW-photoW)/2,photoY=(outH-photoH)/2;
  drawMirrored(ctx,video,photoX,photoY,photoW,photoH);
- const vr=video.getBoundingClientRect(),gr=guide.getBoundingClientRect(),previewScale=Math.min(vr.width/sourceW,vr.height/sourceH),shownW=sourceW*previewScale,shownH=sourceH*previewScale,offsetX=(vr.width-shownW)/2,offsetY=(vr.height-shownH)/2;
+ const vr=video.getBoundingClientRect(),gr=guide.getBoundingClientRect(),previewScale=Math.max(vr.width/sourceW,vr.height/sourceH),shownW=sourceW*previewScale,shownH=sourceH*previewScale,offsetX=(vr.width-shownW)/2,offsetY=(vr.height-shownH)/2;
  const normX=(gr.left-vr.left-offsetX)/shownW,normY=(gr.top-vr.top-offsetY)/shownH,normW=gr.width/shownW,normH=gr.height/shownH;
  const x=photoX+normX*photoW,y=photoY+normY*photoH,gw=normW*photoW,gh=normH*photoH;
  drawEffect(ctx,x,y,gw,gh,c.cor);drawCaption(ctx,outW,outH,c);
