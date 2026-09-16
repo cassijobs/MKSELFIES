@@ -15,11 +15,12 @@ function capture(){
  canvas.width=outW;canvas.height=outH;
  const bgScale=Math.max(outW/sourceW,outH/sourceH),bgW=sourceW*bgScale,bgH=sourceH*bgScale;
  ctx.save();ctx.filter='blur(34px) brightness(.55)';drawMirrored(ctx,video,(outW-bgW)/2,(outH-bgH)/2,bgW,bgH);ctx.restore();
- const frameX=0,frameY=(outH-1350)/2,frameW=outW,frameH=1350,photoScale=Math.max(frameW/sourceW,frameH/sourceH),photoW=sourceW*photoScale,photoH=sourceH*photoScale,photoX=frameX+(frameW-photoW)/2,photoY=frameY+(frameH-photoH)/2;
- ctx.save();ctx.beginPath();ctx.rect(frameX,frameY,frameW,frameH);ctx.clip();drawMirrored(ctx,video,photoX,photoY,photoW,photoH);ctx.restore();
- const vr=video.getBoundingClientRect(),gr=guide.getBoundingClientRect();
- const normX=(gr.left-vr.left)/vr.width,normY=(gr.top-vr.top)/vr.height,normW=gr.width/vr.width,normH=gr.height/vr.height;
- const x=frameX+normX*frameW,y=frameY+normY*frameH,gw=normW*frameW,gh=normH*frameH;
+ const photoScale=Math.min(outW/sourceW,outH/sourceH),photoW=sourceW*photoScale,photoH=sourceH*photoScale,photoX=(outW-photoW)/2,photoY=(outH-photoH)/2;
+ const layer=document.createElement('canvas'),lctx=layer.getContext('2d');layer.width=outW;layer.height=outH;drawMirrored(lctx,video,photoX,photoY,photoW,photoH);
+ lctx.globalCompositeOperation='destination-in';const fade=lctx.createLinearGradient(0,photoY,0,photoY+photoH);fade.addColorStop(0,'transparent');fade.addColorStop(.14,'#000');fade.addColorStop(.86,'#000');fade.addColorStop(1,'transparent');lctx.fillStyle=fade;lctx.fillRect(photoX,photoY,photoW,photoH);ctx.drawImage(layer,0,0);
+ const vr=video.getBoundingClientRect(),gr=guide.getBoundingClientRect(),previewScale=Math.min(vr.width/sourceW,vr.height/sourceH),shownW=sourceW*previewScale,shownH=sourceH*previewScale,offsetX=(vr.width-shownW)/2,offsetY=(vr.height-shownH)/2;
+ const normX=(gr.left-vr.left-offsetX)/shownW,normY=(gr.top-vr.top-offsetY)/shownH,normW=gr.width/shownW,normH=gr.height/shownH;
+ const x=photoX+normX*photoW,y=photoY+normY*photoH,gw=normW*photoW,gh=normH*photoH;
  drawEffect(ctx,x,y,gw,gh,c.cor);drawCaption(ctx,outW,outH,c);
  canvas.toBlob(blob=>{if(!blob)return;photoUrl=URL.createObjectURL(blob);stopCamera();result(blob,c)},'image/jpeg',.92)
 }
